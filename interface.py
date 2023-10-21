@@ -114,8 +114,8 @@ class Interface:
         self.generated_text.grid(row=0, column=0, padx=10)
 
         self.show_score = Text(self.inner_text_frame_0, background="#22668D", width=50, wrap=WORD,
-                                   foreground="#ffffff", bd=3, height=10, pady=20,
-                                   font=("Courier New", 21, "bold"))
+                               foreground="#ffffff", bd=3, height=10, pady=20,
+                               font=("Courier New", 21, "bold"))
         self.show_score.insert("1.0", " ")
         self.show_score.tag_configure("center", justify='center')
         self.show_score.tag_add("center", "1.0", "end")
@@ -178,17 +178,15 @@ class Interface:
 
         elif event.char != " ":
             self.util.current_word += event.char
-            self.util.total_chars += 1
         curr_char = len(self.util.current_word) - 1
-        selected_word = self.util.words_displayed_copy[self.util.current_count]
+        selected_word = self.util.words_displayed[self.util.current_count]
 
-        if len(self.util.current_word) > len(self.util.words_displayed_copy[self.util.current_count]):
-            self.util.position = (len(''.join(self.util.words_displayed_copy[:self.util.current_count])) +
+        if len(self.util.current_word) > len(self.util.words_displayed[self.util.current_count]):
+            self.util.position = (len(''.join(self.util.words_displayed[:self.util.current_count])) +
                                   len(self.util.entry_typed) + len(selected_word) - 1)
         else:
-            self.util.position = (len(''.join(self.util.words_displayed_copy[:self.util.current_count])) +
+            self.util.position = (len(''.join(self.util.words_displayed[:self.util.current_count])) +
                                   len(self.util.entry_typed) + len(self.util.current_word) - 1)
-
 
         if event.keysym != "space" and event.keysym != "BackSpace":
             try:
@@ -256,7 +254,6 @@ class Interface:
         self.show_score.grid()
         self.show_score.insert(END, data)
 
-
     def recall_letter(self):
         """if the backspace has been clicked, it gets the current index of the generated text"""
         char_length = self.util.position
@@ -274,11 +271,6 @@ class Interface:
                     self.word_text.insert(0, user_typed[self.util.current_count] + " ")
                     self.util.current_word = user_typed[self.util.current_count]
                     self.util.entry_typed = self.util.entry_typed[:-1]
-
-                    # get the difference when it is being removed from the list
-                    if previous_word != self.util.last_user_word:
-                        change_in_char_length = len(previous_word) + 1 - len(self.util.current_word)
-                        self.util.position -= change_in_char_length
             except IndexError as e:
                 pass
 
@@ -287,7 +279,7 @@ class Interface:
                 current_count = self.util.current_count
                 current_word = self.util.current_word
                 length = len(current_word) - 1
-                my_word = self.util.words_displayed_copy[current_count][length]
+                my_word = self.util.words_displayed[current_count][length]
                 try:
                     if current_word[-1] == my_word:
                         if self.util.pass_points > 0:
@@ -303,7 +295,7 @@ class Interface:
     def show_original_letter(self):
         char_length = self.util.position
         current_char = self.util.current_word[-1]
-        my_word = self.util.words_displayed_copy[self.util.current_count][len(self.util.current_word) - 1]
+        my_word = self.util.words_displayed[self.util.current_count][len(self.util.current_word) - 1]
         if my_word == current_char or my_word != current_char and len(self.util.current_char) >= len(
                 self.util.current_word):
             self.generated_text.tag_config("#000000", foreground="#000000")
@@ -412,7 +404,6 @@ class Interface:
         """"Generates 20 random words and keeps a copy of it"""
         sample_size = min(60, len(words_list))
         self.util.words_displayed = random.sample(words_list, sample_size)
-        self.util.words_displayed_copy = copy.copy(self.util.words_displayed)
         return " ".join(self.util.words_displayed)
 
     def get_words(self):
@@ -425,6 +416,5 @@ class Interface:
     def change_text(self):
         """"render the words on the Text widget and keeps a copy of it"""
         self.util.letter_text = self.generate_words(self.util.word_list)
-        self.util.letter_text_copy = copy.copy(self.util.letter_text)
         self.generated_text.delete("1.0", END)
         self.generated_text.insert("1.0", self.util.letter_text)
